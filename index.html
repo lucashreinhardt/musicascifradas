@@ -164,6 +164,40 @@
       color: var(--muted);
       flex-shrink: 0;
     }
+    .bulk-genre-bar {
+      display: none;
+      flex-shrink: 0;
+      margin: 4px 12px 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .bulk-genre-bar.show { display: flex; }
+    .bulk-genre-bar span {
+      font-size: 12.5px;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    .bulk-genre-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .bulk-genre-actions button {
+      font-family: var(--font-ui);
+      font-size: 11.5px;
+      font-weight: 700;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .bulk-genre-actions button[data-genre="Pop Rock"] { background: #7C3AED; }
+    .bulk-genre-actions button[data-genre="Rock"] { background: #DC2626; }
+    .bulk-genre-actions button[data-genre="Pop"] { background: #DB2777; }
+    .bulk-genre-actions button[data-genre="Sertanejo"] { background: #B45309; }
     #song-list {
       flex: 1;
       min-height: 0;
@@ -883,6 +917,15 @@
         </div>
       </div>
       <div class="result-meta" id="result-meta"></div>
+      <div id="bulk-genre-bar" class="bulk-genre-bar">
+        <span id="bulk-genre-label"></span>
+        <div class="bulk-genre-actions" id="bulk-genre-actions">
+          <button type="button" data-genre="Pop Rock">Pop Rock</button>
+          <button type="button" data-genre="Rock">Rock</button>
+          <button type="button" data-genre="Pop">Pop</button>
+          <button type="button" data-genre="Sertanejo">Sertanejo</button>
+        </div>
+      </div>
       <div id="song-list"></div>
       <div id="selection-bar" class="selection-bar">
         <div class="selection-bar-top">
@@ -1371,6 +1414,7 @@
   // Uma música sem gênero definido (campo "genre" vazio no Data.gs, ou nunca
   // classificada) cai em "" e aparece como "Classificar" na lista e na leitura.
   const GENRE_OPTIONS = ['Pop Rock', 'Rock', 'Pop', 'Sertanejo'];
+  const MOST_PLAYED_COUNT = 10; // quantas músicas aparecem em "🔥 Mais tocadas" na tela inicial
   function genreSlug(genre) {
     if (!genre) return 'genre-unclassified';
     const g = genre.toLowerCase();
@@ -1410,8 +1454,19 @@
     clearBtn.classList.toggle('show', rawQuery.length > 0);
 
     let results;
+    let sectionBoundaries = null; // {favEnd, playedEnd} — só usado na visão padrão (sem busca)
     if (!query) {
-      results = SONGS_SORTED;
+      const favs = SONGS_SORTED.filter(function(s) { return isFavorite(s.id); });
+      const nonFavs = SONGS_SORTED.filter(function(s) { return !isFavorite(s.id); });
+      const played = nonFavs
+        .filter(function(s) { return (s.playCount || 0) > 0; })
+        .sort(function(a, b) { return (b.playCount || 0) - (a.playCount || 0); })
+        .slice(0, MOST_PLAYED_COUNT);
+      const playedIds = {};
+      played.forEach(function(s) { playedIds[s.id] = true; });
+      const rest = nonFavs.filter(function(s) { return !playedIds[s.id]; });
+      results = favs.concat(played, rest);
+      sectionBoundaries = { favEnd: favs.length, playedEnd: favs.length + played.length };
     } else if (/^\d+$/.test(rawQuery)) {
       const pageNum = parseInt(rawQuery, 10);
       results = SONGS_SORTED.filter(function(s) { return s.page === pageNum; });
@@ -1422,25 +1477,28 @@
     metaEl.textContent = results.length + (results.length === 1 ? ' música encontrada' : ' músicas encontradas') +
       (query && !/^\d+$/.test(rawQuery) ? '' : '');
 
+    updateBulkGenreBar(query ? results : [], query);
+
     if (results.length === 0) {
       listEl.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhuma música encontrada para "' + escapeHtml(rawQuery) + '"</div>';
       return;
     }
 
     const isTextQuery = query && !/^\d+$/.test(rawQuery);
-    const showFavSection = !query && results.some(function(s) { return isFavorite(s.id); });
+    const totalSections = sectionBoundaries ?
+      (sectionBoundaries.favEnd > 0 ? 1 : 0) +
+      (sectionBoundaries.playedEnd > sectionBoundaries.favEnd ? 1 : 0) +
+      (results.length > sectionBoundaries.playedEnd ? 1 : 0) : 0;
+    const showSections = totalSections > 1;
     let html = '';
-    let favSectionOpen = false;
-    let favSectionClosed = false;
-    results.forEach(function(s) {
-      if (showFavSection) {
-        const fav = isFavorite(s.id);
-        if (fav && !favSectionOpen) {
+    results.forEach(function(s, i) {
+      if (showSections) {
+        if (i === 0 && sectionBoundaries.favEnd > 0) {
           html += '<div class="list-section-label">⭐ Favoritas</div>';
-          favSectionOpen = true;
-        } else if (!fav && !favSectionClosed) {
+        } else if (i === sectionBoundaries.favEnd && sectionBoundaries.playedEnd > sectionBoundaries.favEnd) {
+          html += '<div class="list-section-label">🔥 Mais tocadas</div>';
+        } else if (i === sectionBoundaries.playedEnd && results.length > sectionBoundaries.playedEnd) {
           html += '<div class="list-section-label">Todas as músicas</div>';
-          favSectionClosed = true;
         }
       }
       const titleMatches = s._searchTitle.indexOf(query) !== -1;
@@ -1520,6 +1578,10 @@
   const songPageEl = document.getElementById('song-page');
   const songGenreBtn = document.getElementById('song-genre-btn');
   const songGenreMenu = document.getElementById('song-genre-menu');
+  const bulkGenreBar = document.getElementById('bulk-genre-bar');
+  const bulkGenreLabel = document.getElementById('bulk-genre-label');
+  const bulkGenreActions = document.getElementById('bulk-genre-actions');
+  let bulkGenreArtist = null;
   const backBtn = document.getElementById('back-btn');
 
   const CHORD_LINE_RE = /^[\sA-G0-9#b/()xX*.,+superidimMmaj°ø\-–|:]+$/;
@@ -1680,6 +1742,15 @@
     songGenreMenu.classList.remove('show');
   }
 
+  // Conta quantas vezes cada música é aberta, pra alimentar a seção
+  // "🔥 Mais tocadas" da tela inicial. Atualiza a tela na hora (otimista) e
+  // avisa o servidor em segundo plano, sem travar a abertura da música —
+  // se a chamada falhar, não tem problema, só não conta essa vez.
+  function trackPlay(song) {
+    song.playCount = (song.playCount || 0) + 1;
+    fetch(API_URL + '?action=trackPlay&id=' + encodeURIComponent(song.id)).catch(function() {});
+  }
+
   function openSong(id, returnTarget) {
     const song = SONGS.find(function(s) { return s.id === id; });
     if (!song) { location.hash = '#/'; return; }
@@ -1695,6 +1766,7 @@
     showOnly('song');
     cifraScroll.scrollTop = 0;
     stopAutoScroll();
+    trackPlay(song);
 
     function paint() {
       cifraContent.innerHTML = renderCifra(song);
@@ -1795,6 +1867,54 @@
           reindexSearch();
           renderList();
           alert('Não consegui salvar a classificação agora. Verifique sua conexão e tente de novo.');
+        });
+    });
+  });
+
+  // ---------- Classificar em massa por artista ----------
+  // Aparece quando o resultado da busca é só de UM artista (ex: buscou pelo
+  // nome dele) — deixa classificar todas as músicas dele de uma vez, sem
+  // precisar abrir uma por uma.
+  function updateBulkGenreBar(results, isSearching) {
+    if (!isSearching || selectionMode || results.length === 0) {
+      bulkGenreBar.classList.remove('show');
+      bulkGenreArtist = null;
+      return;
+    }
+    const firstArtist = results[0].artist;
+    const sameArtist = firstArtist && results.every(function(s) { return s.artist === firstArtist; });
+    if (!sameArtist) {
+      bulkGenreBar.classList.remove('show');
+      bulkGenreArtist = null;
+      return;
+    }
+    bulkGenreArtist = firstArtist;
+    const n = results.length;
+    bulkGenreLabel.textContent = 'Classificar ' + n + (n === 1 ? ' música de ' : ' músicas de ') + firstArtist + ':';
+    bulkGenreBar.classList.add('show');
+  }
+
+  Array.prototype.forEach.call(bulkGenreActions.querySelectorAll('button[data-genre]'), function(btn) {
+    btn.addEventListener('click', function() {
+      const genre = btn.getAttribute('data-genre');
+      const artist = bulkGenreArtist;
+      if (!artist) return;
+      const affected = SONGS.filter(function(s) { return s.artist === artist; });
+      const previousGenres = affected.map(function(s) { return s.genre; });
+      affected.forEach(function(s) { s.genre = genre; }); // otimista
+      reindexSearch();
+      renderList();
+      fetch(API_URL + '?action=setGenreForArtist&artist=' + encodeURIComponent(artist) + '&genre=' + encodeURIComponent(genre))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error) throw new Error(data.error);
+        })
+        .catch(function(err) {
+          console.error('Não consegui salvar a classificação em massa:', err);
+          affected.forEach(function(s, i) { s.genre = previousGenres[i]; });
+          reindexSearch();
+          renderList();
+          alert('Não consegui classificar essas músicas agora. Verifique sua conexão e tente de novo.');
         });
     });
   });
