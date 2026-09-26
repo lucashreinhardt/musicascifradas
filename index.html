@@ -198,6 +198,54 @@
     .bulk-genre-actions button[data-genre="Rock"] { background: #DC2626; }
     .bulk-genre-actions button[data-genre="Pop"] { background: #DB2777; }
     .bulk-genre-actions button[data-genre="Sertanejo"] { background: #B45309; }
+    .bulk-genre-actions button[data-genre="Samba"] { background: #16A34A; }
+    .bulk-genre-actions button[data-genre="Católicas"] { background: #4F46E5; }
+    .bulk-genre-actions button[data-origin="Nacional"] { background: #65A30D; }
+    .bulk-genre-actions button[data-origin="Internacional"] { background: #0EA5E9; }
+    .bulk-genre-actions .bulk-sep { width: 100%; height: 0; }
+
+    .filter-bar-wrap { flex-shrink: 0; margin: 0 12px 6px; }
+    .filter-toggle-btn {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--wine-dark);
+      background: none;
+      border: none;
+      padding: 4px 6px;
+      cursor: pointer;
+      opacity: 0.8;
+    }
+    .filter-toggle-btn.active-filter { opacity: 1; color: var(--wine); text-decoration: underline; }
+    .filter-panel {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .filter-panel.show { display: flex; }
+    .filter-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .filter-row-label { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-right: 2px; }
+    .filter-chip {
+      font-family: var(--font-ui);
+      font-size: 11.5px;
+      font-weight: 600;
+      border: 1px solid rgba(61,64,70,0.15);
+      background: transparent;
+      color: var(--ink);
+      border-radius: 20px;
+      padding: 5px 11px;
+      cursor: pointer;
+    }
+    .filter-chip.active {
+      background: var(--wine);
+      border-color: var(--wine);
+      color: #fff;
+    }
     #song-list {
       flex: 1;
       min-height: 0;
@@ -224,6 +272,8 @@
     .song-item.genre-sertanejo { border-left-color: #B45309; }
     .song-item.genre-rock { border-left-color: #DC2626; }
     .song-item.genre-pop { border-left-color: #DB2777; }
+    .song-item.genre-samba { border-left-color: #16A34A; }
+    .song-item.genre-catolicas { border-left-color: #4F46E5; }
     .song-item.genre-unclassified { border-left-color: #9CA3AF; }
     .song-item { transition: transform 0.1s ease; }
     .song-item:active { transform: scale(0.98); }
@@ -242,6 +292,8 @@
     .song-item .genre-tag.genre-sertanejo { background: #B45309; }
     .song-item .genre-tag.genre-rock { background: #DC2626; }
     .song-item .genre-tag.genre-pop { background: #DB2777; }
+    .song-item .genre-tag.genre-samba { background: #16A34A; }
+    .song-item .genre-tag.genre-catolicas { background: #4F46E5; }
     .song-item .genre-tag.genre-unclassified { background: #6B7280; }
     .song-item .title {
       font-family: var(--font-head);
@@ -744,6 +796,10 @@
     .genre-pill.genre-sertanejo { background: #B45309; }
     .genre-pill.genre-rock { background: #DC2626; }
     .genre-pill.genre-pop { background: #DB2777; }
+    .genre-pill.genre-samba { background: #16A34A; }
+    .genre-pill.genre-catolicas { background: #4F46E5; }
+    .genre-pill.origin-nacional { background: #65A30D; }
+    .genre-pill.origin-internacional { background: #0EA5E9; }
     .genre-menu {
       display: none;
       position: absolute;
@@ -924,6 +980,34 @@
           <button type="button" data-genre="Rock">Rock</button>
           <button type="button" data-genre="Pop">Pop</button>
           <button type="button" data-genre="Sertanejo">Sertanejo</button>
+          <button type="button" data-genre="Samba">Samba</button>
+          <button type="button" data-genre="Católicas">Católicas</button>
+          <span class="bulk-sep"></span>
+          <button type="button" data-origin="Nacional">Nacional</button>
+          <button type="button" data-origin="Internacional">Internacional</button>
+        </div>
+      </div>
+      <div class="filter-bar-wrap">
+        <button type="button" id="filter-toggle-btn" class="filter-toggle-btn">🎚️ Filtrar por estilo</button>
+        <div id="filter-panel" class="filter-panel">
+          <div class="filter-row">
+            <span class="filter-row-label">Estilo:</span>
+            <button type="button" class="filter-chip active" data-filter-genre="">Todos</button>
+            <button type="button" class="filter-chip" data-filter-genre="Pop Rock">Pop Rock</button>
+            <button type="button" class="filter-chip" data-filter-genre="Rock">Rock</button>
+            <button type="button" class="filter-chip" data-filter-genre="Pop">Pop</button>
+            <button type="button" class="filter-chip" data-filter-genre="Sertanejo">Sertanejo</button>
+            <button type="button" class="filter-chip" data-filter-genre="Samba">Samba</button>
+            <button type="button" class="filter-chip" data-filter-genre="Católicas">Católicas</button>
+            <button type="button" class="filter-chip" data-filter-genre="__unclassified__">Classificar</button>
+          </div>
+          <div class="filter-row">
+            <span class="filter-row-label">Origem:</span>
+            <button type="button" class="filter-chip active" data-filter-origin="">Todos</button>
+            <button type="button" class="filter-chip" data-filter-origin="Nacional">Nacional</button>
+            <button type="button" class="filter-chip" data-filter-origin="Internacional">Internacional</button>
+            <button type="button" class="filter-chip" data-filter-origin="__unclassified__">Classificar</button>
+          </div>
         </div>
       </div>
       <div id="song-list"></div>
@@ -956,6 +1040,15 @@
               <button type="button" data-genre="Rock">Rock</button>
               <button type="button" data-genre="Pop">Pop</button>
               <button type="button" data-genre="Sertanejo">Sertanejo</button>
+              <button type="button" data-genre="Samba">Samba</button>
+              <button type="button" data-genre="Católicas">Católicas</button>
+            </div>
+          </div>
+          <div class="genre-pill-wrap">
+            <button class="genre-pill" id="song-origin-btn" type="button">Origem?</button>
+            <div class="genre-menu" id="song-origin-menu">
+              <button type="button" data-origin="Nacional">Nacional</button>
+              <button type="button" data-origin="Internacional">Internacional</button>
             </div>
           </div>
         </div>
@@ -1107,6 +1200,8 @@
   // ---------- Dados ----------
   let SONGS = [];
   let SONGS_SORTED = [];
+  let activeGenreFilter = ''; // '' = todos, '__unclassified__' = sem gênero, ou um dos GENRE_OPTIONS
+  let activeOriginFilter = ''; // '' = todos, '__unclassified__' = sem origem, 'Nacional' ou 'Internacional'
 
   // ---------- Favoritas (compartilhado entre todos, igual ao setlist) ----------
   let favoriteIds = new Set();
@@ -1153,7 +1248,7 @@
   function reindexSearch() {
     SONGS.forEach(function(s) {
       s._searchTitle = normalize(s.title + ' ' + s.artist);
-      s._searchFull = normalize(s.title + ' ' + s.artist + ' ' + (s.genre || '') + ' ' + (s.cifra || ''));
+      s._searchFull = normalize(s.title + ' ' + s.artist + ' ' + (s.genre || '') + ' ' + (s.origin || '') + ' ' + (s.cifra || ''));
     });
   }
 
@@ -1413,7 +1508,8 @@
   // Lista fixa de gêneros que aparecem no seletor ao classificar uma música.
   // Uma música sem gênero definido (campo "genre" vazio no Data.gs, ou nunca
   // classificada) cai em "" e aparece como "Classificar" na lista e na leitura.
-  const GENRE_OPTIONS = ['Pop Rock', 'Rock', 'Pop', 'Sertanejo'];
+  const GENRE_OPTIONS = ['Pop Rock', 'Rock', 'Pop', 'Sertanejo', 'Samba', 'Católicas'];
+  const ORIGIN_OPTIONS = ['Nacional', 'Internacional'];
   const MOST_PLAYED_COUNT = 10; // quantas músicas aparecem em "🔥 Mais tocadas" na tela inicial
   function genreSlug(genre) {
     if (!genre) return 'genre-unclassified';
@@ -1421,10 +1517,20 @@
     if (g === 'sertanejo') return 'genre-sertanejo';
     if (g === 'rock') return 'genre-rock';
     if (g === 'pop') return 'genre-pop';
+    if (g === 'samba') return 'genre-samba';
+    if (g === 'católicas' || g === 'catolicas') return 'genre-catolicas';
     return 'genre-pop-rock';
   }
   function genreLabel(genre) {
     return genre || 'Classificar';
+  }
+  function originSlug(origin) {
+    if (!origin) return 'origin-unclassified';
+    const o = origin.toLowerCase();
+    return o === 'nacional' ? 'origin-nacional' : 'origin-internacional';
+  }
+  function originLabel(origin) {
+    return origin || 'Origem?';
   }
 
   function highlight(text, query) {
@@ -1474,10 +1580,25 @@
       results = SONGS_SORTED.filter(function(s) { return s._searchFull.indexOf(query) !== -1; });
     }
 
+    const hasFilter = activeGenreFilter !== '' || activeOriginFilter !== '';
+    if (hasFilter) {
+      results = results.filter(function(s) {
+        let ok = true;
+        if (activeGenreFilter) {
+          ok = ok && (activeGenreFilter === '__unclassified__' ? !s.genre : s.genre === activeGenreFilter);
+        }
+        if (activeOriginFilter) {
+          ok = ok && (activeOriginFilter === '__unclassified__' ? !s.origin : s.origin === activeOriginFilter);
+        }
+        return ok;
+      });
+      sectionBoundaries = null; // com filtro ativo, mostra lista simples (sem seções de favoritas/mais tocadas)
+    }
+
     metaEl.textContent = results.length + (results.length === 1 ? ' música encontrada' : ' músicas encontradas') +
       (query && !/^\d+$/.test(rawQuery) ? '' : '');
 
-    updateBulkGenreBar(query ? results : [], query);
+    updateBulkGenreBar((query || hasFilter) ? results : [], query || hasFilter);
 
     if (results.length === 0) {
       listEl.innerHTML = '<div class="empty-state"><svg class="icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhuma música encontrada para "' + escapeHtml(rawQuery) + '"</div>';
@@ -1578,6 +1699,8 @@
   const songPageEl = document.getElementById('song-page');
   const songGenreBtn = document.getElementById('song-genre-btn');
   const songGenreMenu = document.getElementById('song-genre-menu');
+  const songOriginBtn = document.getElementById('song-origin-btn');
+  const songOriginMenu = document.getElementById('song-origin-menu');
   const bulkGenreBar = document.getElementById('bulk-genre-bar');
   const bulkGenreLabel = document.getElementById('bulk-genre-label');
   const bulkGenreActions = document.getElementById('bulk-genre-actions');
@@ -1742,6 +1865,13 @@
     songGenreMenu.classList.remove('show');
   }
 
+  function updateOriginPill(song) {
+    const slug = originSlug(song.origin);
+    songOriginBtn.textContent = originLabel(song.origin);
+    songOriginBtn.className = 'genre-pill' + (song.origin ? ' is-set ' + slug : '');
+    songOriginMenu.classList.remove('show');
+  }
+
   // Conta quantas vezes cada música é aberta, pra alimentar a seção
   // "🔥 Mais tocadas" da tela inicial. Atualiza a tela na hora (otimista) e
   // avisa o servidor em segundo plano, sem travar a abertura da música —
@@ -1763,6 +1893,7 @@
     songArtistEl.textContent = song.artist || '';
     songPageEl.textContent = 'Nº ' + song.page;
     updateGenrePill(song);
+    updateOriginPill(song);
     showOnly('song');
     cifraScroll.scrollTop = 0;
     stopAutoScroll();
@@ -1835,7 +1966,7 @@
     }
   });
 
-  // ---------- Classificar gênero (Pop Rock / Rock / Pop / Sertanejo) ----------
+  // ---------- Classificar gênero (Pop Rock / Rock / Pop / Sertanejo / Samba / Católicas) ----------
   songGenreBtn.addEventListener('click', function(e) {
     e.stopPropagation();
     songGenreMenu.classList.toggle('show');
@@ -1843,6 +1974,9 @@
   document.addEventListener('click', function(e) {
     if (!songGenreMenu.contains(e.target) && e.target !== songGenreBtn) {
       songGenreMenu.classList.remove('show');
+    }
+    if (!songOriginMenu.contains(e.target) && e.target !== songOriginBtn) {
+      songOriginMenu.classList.remove('show');
     }
   });
   Array.prototype.forEach.call(songGenreMenu.querySelectorAll('button[data-genre]'), function(btn) {
@@ -1867,6 +2001,37 @@
           reindexSearch();
           renderList();
           alert('Não consegui salvar a classificação agora. Verifique sua conexão e tente de novo.');
+        });
+    });
+  });
+
+  // ---------- Classificar origem (Nacional / Internacional) ----------
+  songOriginBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    songOriginMenu.classList.toggle('show');
+  });
+  Array.prototype.forEach.call(songOriginMenu.querySelectorAll('button[data-origin]'), function(btn) {
+    btn.addEventListener('click', function() {
+      const origin = btn.getAttribute('data-origin');
+      if (!currentSong) return;
+      const song = currentSong;
+      const previousOrigin = song.origin;
+      song.origin = origin;
+      updateOriginPill(song);
+      reindexSearch();
+      renderList();
+      fetch(API_URL + '?action=setOrigin&id=' + encodeURIComponent(song.id) + '&origin=' + encodeURIComponent(origin))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error) throw new Error(data.error);
+        })
+        .catch(function(err) {
+          console.error('Não consegui salvar a origem:', err);
+          song.origin = previousOrigin;
+          if (currentSong === song) updateOriginPill(song);
+          reindexSearch();
+          renderList();
+          alert('Não consegui salvar a origem agora. Verifique sua conexão e tente de novo.');
         });
     });
   });
@@ -1916,6 +2081,63 @@
           renderList();
           alert('Não consegui classificar essas músicas agora. Verifique sua conexão e tente de novo.');
         });
+    });
+  });
+
+  Array.prototype.forEach.call(bulkGenreActions.querySelectorAll('button[data-origin]'), function(btn) {
+    btn.addEventListener('click', function() {
+      const origin = btn.getAttribute('data-origin');
+      const artist = bulkGenreArtist;
+      if (!artist) return;
+      const affected = SONGS.filter(function(s) { return s.artist === artist; });
+      const previousOrigins = affected.map(function(s) { return s.origin; });
+      affected.forEach(function(s) { s.origin = origin; });
+      reindexSearch();
+      renderList();
+      fetch(API_URL + '?action=setOriginForArtist&artist=' + encodeURIComponent(artist) + '&origin=' + encodeURIComponent(origin))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.error) throw new Error(data.error);
+        })
+        .catch(function(err) {
+          console.error('Não consegui salvar a origem em massa:', err);
+          affected.forEach(function(s, i) { s.origin = previousOrigins[i]; });
+          reindexSearch();
+          renderList();
+          alert('Não consegui classificar a origem dessas músicas agora. Verifique sua conexão e tente de novo.');
+        });
+    });
+  });
+
+  // ---------- Filtrar a lista por estilo / origem ----------
+  const filterToggleBtn = document.getElementById('filter-toggle-btn');
+  const filterPanel = document.getElementById('filter-panel');
+  filterToggleBtn.addEventListener('click', function() {
+    filterPanel.classList.toggle('show');
+  });
+  function updateFilterToggleLabel() {
+    const active = activeGenreFilter !== '' || activeOriginFilter !== '';
+    filterToggleBtn.classList.toggle('active-filter', active);
+    filterToggleBtn.textContent = active ? '🎚️ Filtro ativo' : '🎚️ Filtrar por estilo';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-filter-genre]'), function(btn) {
+    btn.addEventListener('click', function() {
+      activeGenreFilter = btn.getAttribute('data-filter-genre');
+      Array.prototype.forEach.call(document.querySelectorAll('button[data-filter-genre]'), function(b) {
+        b.classList.toggle('active', b === btn);
+      });
+      updateFilterToggleLabel();
+      renderList();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-filter-origin]'), function(btn) {
+    btn.addEventListener('click', function() {
+      activeOriginFilter = btn.getAttribute('data-filter-origin');
+      Array.prototype.forEach.call(document.querySelectorAll('button[data-filter-origin]'), function(b) {
+        b.classList.toggle('active', b === btn);
+      });
+      updateFilterToggleLabel();
+      renderList();
     });
   });
 
